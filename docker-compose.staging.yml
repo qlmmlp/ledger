@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      args:
+        - ENV=staging
+    volumes:
+      - ./docker/php/php.staging.ini:/usr/local/etc/php/conf.d/php.ini
+    environment:
+      - APP_ENV=staging
+      - APP_DEBUG=0
+
+  nginx:
+    volumes:
+      - ./docker/nginx/staging.conf:/etc/nginx/conf.d/default.conf

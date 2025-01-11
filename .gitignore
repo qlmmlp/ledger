@@ -3,3 +3,4 @@ vendor
 var/*
 !var/.gitkeep
 .DS_Store
+.active_env

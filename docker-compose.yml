@@ -30,6 +30,7 @@ services:
     ports:
       - "8000:80"
     volumes:
+      - .:/app:ro
       - ./var/log/nginx:/var/log/nginx:rw
     networks:
       - ledger-network

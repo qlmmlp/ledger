@@ -36,9 +36,20 @@ USER www-data
 
 # Production stage
 FROM base AS prod
+
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Copy application files only in production
-COPY --chown=www-data:www-data ./ /app
+# Copy composer files first to leverage Docker cache
+COPY --chown=www-data:www-data composer.json composer.lock ./
+
+# Install dependencies with composer
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+
+# Copy application files
+COPY --chown=www-data:www-data . .
+RUN chmod +x bin/*
+
+# Generate optimized autoloader
+RUN composer dump-autoload --optimize
 
 USER www-data

@@ -72,6 +72,10 @@ staging: check-no-env ## Environment Selection: Select staging environment
 	@echo "$(SUCCESS)Staging environment selected!$(NC)"
 	@echo "$(INFO)Run 'make build' to build containers or 'make up' to start the environment$(NC)"
 
+install: check-env ## Development Tools: Run installation script
+	@echo "$(INFO)Running installation for $(CURRENT_ENV) environment...$(NC)"
+	@docker compose exec app ./bin/install
+
 # Start environment
 up: check-env ## Container Operations: Start the current environment
 	@echo "$(WARNING)Starting $(CURRENT_ENV) environment...$(NC)"

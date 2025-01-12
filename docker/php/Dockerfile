@@ -17,6 +17,10 @@ RUN apt-get update && apt-get install -y \
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Set up composer cache directory with correct permissions
+RUN mkdir -p /var/www/.composer && \
+    chown -R www-data:www-data /var/www/.composer
+
 # Use PHP-FPM's built-in user
 RUN usermod -u 1000 www-data && \
     groupmod -g 1000 www-data

@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+# Colors for output
+INFO='\033[0;36m'
+SUCCESS='\033[0;32m'
+WARNING='\033[0;33m'
+ERROR='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Function to log messages
+log() {
+    local level=$1
+    local message=$2
+    case $level in
+        "INFO")    echo -e "${INFO}[INFO]${NC} $message" ;;
+        "SUCCESS") echo -e "${SUCCESS}[SUCCESS]${NC} $message" ;;
+        "WARNING") echo -e "${WARNING}[WARNING]${NC} $message" ;;
+        "ERROR")   echo -e "${ERROR}[ERROR]${NC} $message" ;;
+    esac
+}
+
+# Function to check if we're in dev environment
+is_dev_env() {
+    [[ "${APP_ENV}" == "dev" ]]
+}
+
+
+# Install composer dependencies (dev environment only)
+install_composer_deps() {
+    log "INFO" "Installing composer dependencies..."
+    composer install --no-interaction
+    if [ $? -eq 0 ]; then
+        log "SUCCESS" "Composer dependencies installed successfully"
+    else
+        log "ERROR" "Failed to install composer dependencies"
+        exit 1
+    fi
+}
+
+# Setup database
+setup_database() {
+    log "INFO" "Setting up database..."
+
+    # Wait for database to be ready
+    until php bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
+        log "WARNING" "Waiting for database connection..."
+        sleep 1
+    done
+
+    # Run migrations
+    php bin/console doctrine:migrations:migrate --no-interaction
+    if [ $? -eq 0 ]; then
+        log "SUCCESS" "Database migrations applied successfully"
+    else
+        log "ERROR" "Failed to apply database migrations"
+        exit 1
+    fi
+}
+
+# Clear cache
+clear_cache() {
+    log "INFO" "Clearing cache..."
+    php bin/console cache:clear
+    if [ $? -eq 0 ]; then
+        log "SUCCESS" "Cache cleared successfully"
+    else
+        log "WARNING" "Failed to clear cache"
+    fi
+}
+
+# Main installation process
+main() {
+    log "INFO" "Starting installation process..."
+    clear_cache
+
+    # Development-specific steps
+    if is_dev_env; then
+        log "INFO" "Development environment detected - installing additional components..."
+        install_composer_deps
+    fi
+
+    # Setup database if migrations exist
+    if [ -d "migrations" ]; then
+        setup_database
+    fi
+
+    log "SUCCESS" "Installation completed successfully!"
+}
+
+# Run main function
+main

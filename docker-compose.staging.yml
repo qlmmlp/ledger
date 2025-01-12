@@ -10,5 +10,7 @@ services:
       - APP_DEBUG=0
 
   nginx:
+    build:
+      target: prod
     volumes:
-      - ./docker/nginx/staging.conf:/etc/nginx/conf.d/default.conf
+      - ./var/log/nginx:/var/log/nginx:rw

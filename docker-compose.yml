@@ -2,31 +2,43 @@ services:
   app:
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/php/Dockerfile
       target: ${DOCKER_TARGET:-prod}
-    container_name: ledger-app
+    container_name: app
     restart: unless-stopped
-    working_dir: /var/www/
+    working_dir: /app
     volumes:
-      - ./:/var/www
+      - .:/app
+      - ./var/log:/var/log
+      - ./var/log/xdebug:/var/log/xdebug
     networks:
       - ledger-network
+    depends_on:
+      db:
+        condition: service_healthy
 
   nginx:
-    image: nginx:alpine
-    container_name: ledger-nginx
+    environment:
+      NGINX_ENTRYPOINT_QUIET_LOGS: 1
+      DOCKER_ENABLE_IPV6: "false"
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+      target: ${DOCKER_TARGET:-prod}
+    container_name: nginx
     restart: unless-stopped
     ports:
       - "8000:80"
     volumes:
-      - ./:/var/www
-      - ./docker/nginx:/etc/nginx/conf.d/
+      - ./var/log/nginx:/var/log/nginx:rw
     networks:
       - ledger-network
+    depends_on:
+      - app
 
   db:
     image: postgres:15-alpine
-    container_name: ledger-db
+    container_name: db
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${DB_DATABASE}
@@ -38,7 +50,7 @@ services:
       - ledger-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
 

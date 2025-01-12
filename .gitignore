@@ -1,0 +1,7 @@
+.idea
+vendor
+var/*
+!var/log/php/.gitkeep
+.DS_Store
+.active_env
+.env.local

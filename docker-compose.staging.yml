@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      args:
+        - ENV=staging
+    environment:
+      - APP_ENV=staging
+      - APP_DEBUG=0
+
+  nginx:
+    build:
+      target: prod

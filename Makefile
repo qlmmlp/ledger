@@ -108,7 +108,8 @@ destroy: ## Container Operations: Remove all environment resources
 		echo "$(WARNING)Destroying $(CURRENT_ENV) environment...$(NC)"; \
 		docker compose down -v; \
 		docker rmi $$(docker images -q ledger-*) 2>/dev/null || true; \
-		rm -f .env.local .active_env; \
+		rm -f .active_env; \
+		rm -rf vendor; \
 		$(MAKE) clean-logs; \
 		echo "$(SUCCESS)Environment destroyed.$(NC)"; \
 	else \

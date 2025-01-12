@@ -26,12 +26,13 @@ services:
       dockerfile: Dockerfile
       target: ${DOCKER_TARGET:-prod}
     container_name: nginx
+    command: >
+      /bin/sh -c "chown nginx:nginx /var/log/nginx && nginx -g 'daemon off;'"
     restart: unless-stopped
     ports:
       - "8000:80"
     volumes:
       - .:/app:ro
-      - ./var/log/nginx:/var/log/nginx:rw
     networks:
       - ledger-network
     depends_on:

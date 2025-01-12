@@ -37,25 +37,7 @@ install_composer_deps() {
     fi
 }
 
-# Setup database
-setup_database() {
-    log "INFO" "Setting up database..."
 
-    # Wait for database to be ready
-    until php bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
-        log "WARNING" "Waiting for database connection..."
-        sleep 1
-    done
-
-    # Run migrations
-    php bin/console doctrine:migrations:migrate --no-interaction
-    if [ $? -eq 0 ]; then
-        log "SUCCESS" "Database migrations applied successfully"
-    else
-        log "ERROR" "Failed to apply database migrations"
-        exit 1
-    fi
-}
 
 # Clear cache
 clear_cache() {
@@ -71,17 +53,11 @@ clear_cache() {
 # Main installation process
 main() {
     log "INFO" "Starting installation process..."
-    clear_cache
 
     # Development-specific steps
     if is_dev_env; then
         log "INFO" "Development environment detected - installing additional components..."
         install_composer_deps
-    fi
-
-    # Setup database if migrations exist
-    if [ -d "migrations" ]; then
-        setup_database
     fi
 
     log "SUCCESS" "Installation completed successfully!"

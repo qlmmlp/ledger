@@ -18,7 +18,7 @@ WARNING := \033[0;33m
 ERROR := \033[0;31m
 NC := \033[0m # No Color
 
-.PHONY: help dev staging stop destroy status ps logs build up shell xshell clean-logs
+.PHONY: help dev staging stop destroy status ps logs build up shell xshell
 
 # Default target
 help: ## Show available commands
@@ -63,12 +63,6 @@ check-env:
 		echo "$(ERROR)No environment selected. Run make $(ENV_DEV) or make $(ENV_STAGING) first.$(NC)"; \
 		exit 1; \
 	fi
-
-# Clean log files
-clean-logs: ## Container Operations: Clean all log files but keep directories
-	@echo "$(WARNING)Cleaning log files...$(NC)"
-	@find var/log -type f ! -name '.gitkeep' -delete
-	@echo "$(SUCCESS)Log files cleaned.$(NC)"
 
 # Select development environment
 dev: check-no-env ## Environment Selection: Select development environment
@@ -122,7 +116,7 @@ destroy: ## Container Operations: Remove all environment resources
 		docker rmi $$(docker images -q ledger-*) 2>/dev/null || true; \
 		rm -f $(ENV_FILE); \
 		rm -rf vendor; \
-		$(MAKE) clean-logs; \
+		rm -rf var/cache; \
 		echo "$(SUCCESS)Environment destroyed.$(NC)"; \
 	else \
 		echo "$(WARNING)No environment to destroy.$(NC)"; \
